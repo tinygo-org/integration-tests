@@ -75,7 +75,10 @@ func (board *Board) flash(sha string) (string, error) {
 		"--rm",
 		buildtag,
 		"tinygo", "flash",
-		"-target", board.target, port, file).CombinedOutput()
+		"-size", "short",
+		"-target", board.target,
+		port,
+		file).CombinedOutput()
 	return string(out), err
 }
 
