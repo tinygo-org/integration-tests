@@ -170,6 +170,7 @@ func analogReadVoltage() {
 	for i := 0; i < 10; i++ {
 		v := analogV.Get()
 		avg += int(v)
+		time.Sleep(10 * time.Millisecond)
 	}
 	avg /= 10
 	val := uint16(avg)
@@ -196,6 +197,7 @@ func analogReadGround() {
 	for i := 0; i < 10; i++ {
 		v := analogG.Get()
 		avg += int(v)
+		time.Sleep(10 * time.Millisecond)
 	}
 	avg /= 10
 	val := uint16(avg)
@@ -222,6 +224,7 @@ func analogReadHalfVoltage() {
 	for i := 0; i < 10; i++ {
 		v := analogHalf.Get()
 		avg += int(v)
+		time.Sleep(10 * time.Millisecond)
 	}
 	avg /= 10
 	val := uint16(avg)
