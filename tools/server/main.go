@@ -93,9 +93,10 @@ func main() {
 	builds = make(map[string]*Build)
 	buildsCh := make(chan *Build)
 
+	go processBuilds(buildsCh)
+
 	handlePreviouslyQueuedBuilds(buildsCh)
 
-	go processBuilds(buildsCh)
 	go pollPendingBuilds(buildsCh)
 
 	http.HandleFunc(ghwebhookpath, func(w http.ResponseWriter, r *http.Request) {
