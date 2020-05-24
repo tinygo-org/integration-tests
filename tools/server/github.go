@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -153,6 +154,28 @@ func (build Build) reloadCheckRuns() error {
 	}
 
 	return nil
+}
+
+// reload the check runs from github for this build
+func findQueuedCheckRuns(sha string) ([]*github.CheckRun, error) {
+	runs := make([]*github.CheckRun, 0)
+	status := "queued"
+	opts := github.ListCheckRunsOptions{Status: &status}
+	res, _, err := client.Checks.ListCheckRunsForRef(context.Background(), ghorg, ghrepo, sha, &opts)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, run := range res.CheckRuns {
+		if !strings.Contains(run.GetName(), "tinyhci:") {
+			continue
+		}
+
+		fmt.Println(run.GetID(), run.GetStatus())
+		runs = append(runs, run)
+	}
+
+	return runs, nil
 }
 
 func targetName(target string) string {

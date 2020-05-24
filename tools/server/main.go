@@ -93,6 +93,8 @@ func main() {
 	builds = make(map[string]*Build)
 	buildsCh := make(chan *Build)
 
+	handlePreviouslyQueuedBuilds(buildsCh)
+
 	go processBuilds(buildsCh)
 	go pollPendingBuilds(buildsCh)
 
@@ -143,32 +145,7 @@ func main() {
 			switch event.CheckRun.GetStatus() {
 			case "completed":
 				if event.GetAction() == "rerequested" {
-					// do the retest here
-					bn, err := getCIBuildNumFromSHA(event.CheckRun.GetHeadSHA())
-					if err != nil {
-						log.Println(err)
-						return
-					}
-
-					url, err := getTinygoBinaryURL(bn)
-					if err != nil {
-						log.Println(err)
-						return
-					}
-
-					target, err := parseTarget(event.CheckRun.GetName())
-					if err != nil {
-						log.Println(err)
-						return
-					}
-
-					build := NewBuild(event.CheckRun.GetHeadSHA())
-					build.binaryURL = url
-					build.runs[target] = event.CheckRun
-					builds[build.sha] = build
-
-					// handoff to channel for processing
-					buildsCh <- build
+					performCheckRun(event.CheckRun, buildsCh)
 				}
 			case "queued":
 				// received when a new commit is pushed
@@ -282,5 +259,58 @@ func pollPendingBuilds(buildsCh chan *Build) {
 
 		// sleep in-between waiting for new builds
 		time.Sleep(pollFrequency)
+	}
+}
+
+func performCheckRun(cr *github.CheckRun, buildsCh chan *Build) {
+	// do the retest here
+	bn, err := getCIBuildNumFromSHA(cr.GetHeadSHA())
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	url, err := getTinygoBinaryURL(bn)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	target, err := parseTarget(cr.GetName())
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	build := NewBuild(cr.GetHeadSHA())
+	build.binaryURL = url
+	build.runs[target] = cr
+	builds[build.sha] = build
+
+	// handoff to channel for processing
+	buildsCh <- build
+}
+
+// handlePreviouslyQueuedBuilds retrieves builds that were
+// already queued before the server was started, probably due
+// to some error or failure.
+func handlePreviouslyQueuedBuilds(buildsCh chan *Build) {
+	cibuilds, err := getRecentSuccessfulCIBuilds()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, cib := range cibuilds {
+		// any queued checkruns for this build?
+		runs, err := findQueuedCheckRuns(cib.VcsRevision)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		for _, run := range runs {
+			performCheckRun(run, buildsCh)
+		}
 	}
 }

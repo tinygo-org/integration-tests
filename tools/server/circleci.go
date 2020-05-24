@@ -124,3 +124,24 @@ func getMostRecentCIBuildNumAfterStart(sha string, start time.Time) (string, err
 
 	return "", fmt.Errorf("cannot find TinyGo build for %s", sha)
 }
+
+func getRecentSuccessfulCIBuilds() ([]*circleci.Build, error) {
+	successes := make([]*circleci.Build, 0)
+	client := &circleci.Client{}
+
+	builds, err := client.ListRecentBuildsForProject("github", "tinygo-org", "tinygo", "", "", 100, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, build := range builds {
+		if build.BuildParameters["CIRCLE_JOB"] != "build-linux" &&
+			build.Status != "success" {
+			continue
+		}
+
+		successes = append(successes, build)
+	}
+
+	return successes, nil
+}
