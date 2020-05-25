@@ -77,7 +77,7 @@ func getCIBuildNumFromSHA(sha string) (string, error) {
 	client := &circleci.Client{}
 
 	for offset := 0; offset <= 500; offset += 100 {
-		cibuilds, err := client.ListRecentBuildsForProject("github", ghorg, ghrepo, "", "", 100, offset)
+		cibuilds, err := client.ListRecentBuildsForProject("github", ghorg, ghrepo, "", "success", 100, offset)
 		if err != nil {
 			return "", err
 		}
@@ -85,8 +85,7 @@ func getCIBuildNumFromSHA(sha string) (string, error) {
 		for _, b := range cibuilds {
 			// we're looking for the sha
 			if b.BuildParameters["CIRCLE_JOB"] == "build-linux" &&
-				b.VcsRevision == sha &&
-				b.Status == "success" {
+				b.VcsRevision == sha {
 
 				bn := strconv.Itoa(b.BuildNum)
 				return bn, nil
@@ -105,7 +104,7 @@ func getMostRecentCIBuildNumAfterStart(sha string, start time.Time) (string, err
 	client := &circleci.Client{}
 
 	for offset := 0; offset <= 500; offset += 100 {
-		cibuilds, err := client.ListRecentBuildsForProject("github", ghorg, ghrepo, "", "", 100, offset)
+		cibuilds, err := client.ListRecentBuildsForProject("github", ghorg, ghrepo, "", "success", 100, offset)
 		if err != nil {
 			return "", err
 		}
@@ -113,8 +112,7 @@ func getMostRecentCIBuildNumAfterStart(sha string, start time.Time) (string, err
 		for _, b := range cibuilds {
 			if b.BuildParameters["CIRCLE_JOB"] == "build-linux" &&
 				start.Before(*b.StartTime) &&
-				b.VcsRevision == sha &&
-				b.Status == "success" {
+				b.VcsRevision == sha {
 
 				bn := strconv.Itoa(b.BuildNum)
 				return bn, nil
@@ -129,14 +127,13 @@ func getRecentSuccessfulCIBuilds() ([]*circleci.Build, error) {
 	successes := make([]*circleci.Build, 0)
 	client := &circleci.Client{}
 
-	builds, err := client.ListRecentBuildsForProject("github", "tinygo-org", "tinygo", "", "", 100, 0)
+	builds, err := client.ListRecentBuildsForProject("github", "tinygo-org", "tinygo", "", "success", 100, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, build := range builds {
-		if build.BuildParameters["CIRCLE_JOB"] != "build-linux" &&
-			build.Status != "success" {
+		if build.BuildParameters["CIRCLE_JOB"] != "build-linux" {
 			continue
 		}
 
