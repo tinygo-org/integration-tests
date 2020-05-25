@@ -48,8 +48,9 @@ var (
 )
 
 const (
-	maxanalog       = 65535
-	allowedvariance = 1024
+	maxanalog         = 65535
+	allowedvariance   = 1024
+	numberAnalogReads = 10
 )
 
 func main() {
@@ -167,12 +168,12 @@ func analogReadVoltage() {
 
 	// should be close to max
 	var avg int
-	for i := 0; i < 10; i++ {
+	for i := 0; i < numberAnalogReads; i++ {
 		v := analogV.Get()
 		avg += int(v)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
-	avg /= 10
+	avg /= numberAnalogReads
 	val := uint16(avg)
 
 	if val >= maxanalog-allowedvariance {
@@ -181,7 +182,7 @@ func analogReadVoltage() {
 		return
 	} else {
 		printtestresult("fail")
-		printfailexpected("'val >= 65535-512'")
+		printfailexpected("'val >= 65535-1024'")
 		printfailactual(val)
 	}
 }
@@ -194,12 +195,12 @@ func analogReadGround() {
 
 	// should be close to zero
 	var avg int
-	for i := 0; i < 10; i++ {
+	for i := 0; i < numberAnalogReads; i++ {
 		v := analogG.Get()
 		avg += int(v)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
-	avg /= 10
+	avg /= numberAnalogReads
 	val := uint16(avg)
 
 	if val <= allowedvariance {
@@ -208,7 +209,7 @@ func analogReadGround() {
 	} else {
 		printtestresult("fail")
 
-		printfailexpected("'val <= 512'")
+		printfailexpected("'val <= 1024'")
 		printfailactual(val)
 	}
 }
@@ -222,12 +223,12 @@ func analogReadHalfVoltage() {
 
 	// should be around half the max
 	var avg int
-	for i := 0; i < 10; i++ {
+	for i := 0; i < numberAnalogReads; i++ {
 		v := analogHalf.Get()
 		avg += int(v)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
-	avg /= 10
+	avg /= numberAnalogReads
 	val := uint16(avg)
 
 	if val <= maxanalog/2+allowedvariance && val >= maxanalog/2-allowedvariance {
@@ -235,7 +236,7 @@ func analogReadHalfVoltage() {
 		return
 	}
 	printtestresult("fail")
-	printfailexpected("'val <= 65535/2+512 && val >= 65535/2-512'")
+	printfailexpected("'val <= 65535/2+1024 && val >= 65535/2-1024'")
 	printfailactual(val)
 }
 
