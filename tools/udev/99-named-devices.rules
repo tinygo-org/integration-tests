@@ -33,3 +33,6 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="239a", ATTRS{idProduct}=="0018", SYMLINK+="c
 
 # Sipeed MAix Bit
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", SYMLINK+="maixbit%E{ID_USB_INTERFACE_NUM}"
+
+# ItsyBitsy-nRF52840
+SUBSYSTEM=="tty", ATTRS{idVendor}=="239a", ATTRS{idProduct}=="8051", SYMLINK+="itsybitsy_nrf52840"

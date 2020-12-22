@@ -75,6 +75,14 @@ var (
 			resetpause:  2 * time.Second,
 			enabled:     true,
 		},
+		&Board{
+			target:      "itsybitsy-nrf52840",
+			displayname: "ItsyBitsy nRF52840",
+			port:        "itsybitsy_nrf52840",
+			baud:        115200,
+			resetpause:  2 * time.Second,
+			enabled:     true,
+		},
 	}
 )
 

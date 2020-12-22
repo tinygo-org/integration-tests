@@ -63,6 +63,14 @@ test-maixbit: build/testrunner
 	./build/testrunner /dev/ttyUSB0 115200 2
 #	./build/testrunner /dev/maixbit 115200 2
 
+test-itsybitsy-nrf52840: build/testrunner
+#	tinygo flash -size short -target=itsybitsy-nrf52840 -port=/dev/itsybitsy_nrf52840 ./itsybitsy-nrf52840/
+	tinygo flash -size short -target=itsybitsy-nrf52840 ./itsybitsy-nrf52840/
+	@sleep 2.0s
+	@echo "Running tests..."
+#	./build/testrunner /dev/itsybitsy_nrf52840 115200 2
+	./build/testrunner /dev/ttyACM0 115200 2
+
 update-go:
 	@test "$(CURRENT_GOVERSION)" = "$(TARGET_GOVERSION)" && ( echo "$(RED)$(TARGET_GOVERSION) has already been installed$(NOCOLOR)\n" ; exit 1 )
 	wget "https://dl.google.com/go/$(TARGET_GOVERSION).linux-amd64.tar.gz" -O /tmp/go.tar.gz
