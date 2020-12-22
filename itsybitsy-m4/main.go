@@ -268,7 +268,7 @@ func i2cConnection() {
 	printtest("i2cConnectionPower")
 	// turn on power and should be connected now
 	powerpin.High()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	accel.Configure()
 	time.Sleep(500 * time.Millisecond)
